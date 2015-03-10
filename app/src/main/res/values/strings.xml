@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GooglePlusMini</string>
+    <string name="title_section1">Profile</string>
+    <string name="title_section2">Friends</string>
+    <string name="title_section3">Circles</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
