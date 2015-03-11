@@ -25,131 +25,27 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+//    /**
+//     * The {@link android.support.v4.view.PagerAdapter} that will provide
+//     * fragments for each of the sections. We use a
+//     * {@link FragmentPagerAdapter} derivative, which will keep every
+//     * loaded fragment in memory. If this becomes too memory intensive, it
+//     * may be best to switch to a
+//     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+//     */
     SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /* Request code used to invoke sign in user interactions. */
-    private static final int RC_SIGN_IN = 0;
-    /* Client used to interact with Google APIs. */
-    private GoogleApiClient mGoogleApiClient;
-    /* A flag indicating that a PendingIntent is in progress and prevents
-     * us from starting further intents.
-     */
-    private boolean mIntentInProgress;
-    /* Track whether the sign-in button has been clicked so that we know to resolve
-     * all issues preventing sign-in without waiting.
-     */
-    private boolean mSignInClicked;
-    /* Store the connection result from onConnectionFailed callbacks so that we can
-     * resolve them when the user clicks sign-in.
-     */
-    private ConnectionResult mConnectionResult;
-    private SignInButton sign_in_button;
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
+//    /**
+//     * The {@link ViewPager} that will host the section contents.
+//     */
     ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login_main);
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(Plus.SCOPE_PLUS_LOGIN)
-                .build();
-
-        sign_in_button = (SignInButton) findViewById(R.id.sign_in_button);
-        sign_in_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mGoogleApiClient.isConnecting()) {
-                    mSignInClicked = true;
-                    resolveSignInError();
-                }
-            }
-        });
-    }
-
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
-
-    protected void onStop() {
-        super.onStop();
-
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-    }
-
-    /* A helper method to resolve the current ConnectionResult error. */
-    private void resolveSignInError() {
-        if (mConnectionResult.hasResolution()) {
-            try {
-                mIntentInProgress = true;
-                startIntentSenderForResult(mConnectionResult.getResolution().getIntentSender(),
-                        RC_SIGN_IN, null, 0, 0, 0);
-            } catch (IntentSender.SendIntentException e) {
-                // The intent was canceled before it was sent.  Return to the default
-                // state and attempt to connect to get an updated ConnectionResult.
-                mIntentInProgress = false;
-                mGoogleApiClient.connect();
-            }
-        }
-    }
-
-    public void onConnectionFailed(ConnectionResult result) {
-        if (!mIntentInProgress) {
-            // Store the ConnectionResult so that we can use it later when the user clicks
-            // 'sign-in'.
-            mConnectionResult = result;
-
-            if (mSignInClicked) {
-                // The user has already clicked 'sign-in' so we attempt to resolve all
-                // errors until the user is signed in, or they cancel.
-                resolveSignInError();
-            }
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
-        if (requestCode == RC_SIGN_IN) {
-            if (responseCode != RESULT_OK) {
-                mSignInClicked = false;
-            }
-
-            mIntentInProgress = false;
-
-            if (!mGoogleApiClient.isConnecting()) {
-                mGoogleApiClient.connect();
-            }
-        }
-    }
-
-    public void onConnected(Bundle connectionHint) {
-        mSignInClicked = false;
         setContentView(R.layout.activity_main);
 
-        // Set up the action bar.
+        //Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setHomeButtonEnabled(true);
@@ -185,19 +81,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-//    public void signOut(){
-//        @Override
-//        public void onClick(View view) {
-//            if (view.getId() == R.id.sign_out_button) {
-//                if (mGoogleApiClient.isConnected()) {
-//                    Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-//                    mGoogleApiClient.disconnect();
-//                    mGoogleApiClient.connect();
-//                }
-//            }
-//        }
-//    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -213,12 +96,27 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_sign_out) {
+            Intent activity = new Intent(MainActivity.this, LoginActivity.class);
+            activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(activity);
+            finish();
+//            if (mGoogleApiClient.isConnected()) {
+//                Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+//                mGoogleApiClient.disconnect();
+//                loggedIn = false;
+////                mGoogleApiClient.connect();
+//            }
         }
-
         return super.onOptionsItemSelected(item);
     }
+
+//    @Override
+//    public boolean onPrepareOptionsMenu (Menu menu) {
+//        if (!loggedIn)
+//            menu.getItem(1).setEnabled(false);
+//        return true;
+//    }
 
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
