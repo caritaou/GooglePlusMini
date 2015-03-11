@@ -2,10 +2,16 @@ package lab2.cmpe277.carita.googleplusmini;
 
 import java.util.Locale;
 
+
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.plus.Plus;
 
+import android.content.Intent;
+import android.content.IntentSender;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -21,7 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -33,6 +39,15 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      */
     SectionsPagerAdapter mSectionsPagerAdapter;
 
+    /* Request code used to invoke sign in user interactions. */
+    private static final int RC_SIGN_IN = 0;
+    /* Client used to interact with Google APIs. */
+    private GoogleApiClient mGoogleApiClient;
+    /* A flag indicating that a PendingIntent is in progress and prevents
+     * us from starting further intents.
+     */
+    private boolean mIntentInProgress;
+
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -42,11 +57,58 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_main);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .build();
+
+        
     }
 
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    protected void onStop() {
+        super.onStop();
+
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
 
     public void onConnectionFailed(ConnectionResult result) {
+        if (!mIntentInProgress && result.hasResolution()) {
+            try {
+                mIntentInProgress = true;
+                startIntentSenderForResult(result.getResolution().getIntentSender(),
+                        RC_SIGN_IN, null, 0, 0, 0);
+            } catch (IntentSender.SendIntentException e) {
+                // The intent was canceled before it was sent.  Return to the default
+                // state and attempt to connect to get an updated ConnectionResult.
+                mIntentInProgress = false;
+                mGoogleApiClient.connect();
+            }
+        }
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
+        if (requestCode == RC_SIGN_IN) {
+            mIntentInProgress = false;
+
+            if (!mGoogleApiClient.isConnecting()) {
+                mGoogleApiClient.connect();
+            }
+        }
     }
 
     public void onConnected(Bundle connectionHint){
@@ -87,7 +149,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setTabListener(this));
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

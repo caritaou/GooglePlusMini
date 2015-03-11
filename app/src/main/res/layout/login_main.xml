@@ -53,7 +53,7 @@
         android:ems="10"
         android:inputType="textPassword" />
 
-    <Button
+    <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
         android:text="@string/login_button"
         android:layout_width="wrap_content"
