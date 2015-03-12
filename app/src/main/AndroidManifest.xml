@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="lab2.cmpe277.carita.googleplusmini.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,8 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="lab2.cmpe277.carita.googleplusmini.MainActivity"
-            android:label="@string/app_name">
+            android:name=".PlusActivity">
         </activity>
 
         <!--<meta-data-->

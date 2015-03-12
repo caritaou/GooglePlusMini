@@ -23,7 +23,7 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    MainActivity.SectionsPagerAdapter mSectionsPagerAdapter;
+    PlusActivity.SectionsPagerAdapter mSectionsPagerAdapter;
 
     /* Request code used to invoke sign in user interactions. */
     private static final int RC_SIGN_IN = 0;
@@ -43,6 +43,10 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
     private ConnectionResult mConnectionResult;
     private SignInButton sign_in_button;
     /**
+     * Keeps track if user is currently signed in
+     */
+    private String loggedIn = "false";
+    /**
      * Intent to go fom login to google plus activity, and sign out back to login activity
      */
 //    private Intent activity;
@@ -52,19 +56,15 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_main);
 
+        Intent activity = getIntent();
+        String loggedIn = activity.getStringExtra("loggedIn");
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Plus.API)
                 .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
-
-        //logout if already connected
-        if (mGoogleApiClient.isConnected()) {
-            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-            mGoogleApiClient.disconnect();
-            mGoogleApiClient.connect();
-        }
 
         sign_in_button = (SignInButton) findViewById(R.id.sign_in_button);
         sign_in_button.setOnClickListener(new View.OnClickListener() {
@@ -85,8 +85,10 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
 
     protected void onStop() {
         super.onStop();
-
+        // Prior to disconnecting, run clearDefaultAccount().
         if (mGoogleApiClient.isConnected()) {
+            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+            Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
             mGoogleApiClient.disconnect();
         }
     }
@@ -141,7 +143,21 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
     }
 
     public void onConnected(Bundle connectionHint) {
-//        setContentView(R.layout.activity_main);
-        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        if(loggedIn.equals("true")){
+            signOut();
+        }
+
+        Intent activity = new Intent(getApplicationContext(), PlusActivity.class);
+        activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(activity);
+    }
+
+
+    public void signOut() {
+        // Prior to disconnecting, run clearDefaultAccount().
+        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+        Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
+        mGoogleApiClient.disconnect();
+        mGoogleApiClient.connect();
     }
 }

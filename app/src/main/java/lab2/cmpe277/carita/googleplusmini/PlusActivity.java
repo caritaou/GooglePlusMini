@@ -3,13 +3,7 @@ package lab2.cmpe277.carita.googleplusmini;
 import java.util.Locale;
 
 
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.plus.Plus;
-
 import android.content.Intent;
-import android.content.IntentSender;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -25,7 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+public class PlusActivity extends ActionBarActivity implements ActionBar.TabListener {
 //    /**
 //     * The {@link android.support.v4.view.PagerAdapter} that will provide
 //     * fragments for each of the sections. We use a
@@ -97,16 +91,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_sign_out) {
-            Intent activity = new Intent(MainActivity.this, LoginActivity.class);
+            Intent activity = new Intent(getApplicationContext(), LoginActivity.class);
             activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activity);
             finish();
-//            if (mGoogleApiClient.isConnected()) {
-//                Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-//                mGoogleApiClient.disconnect();
-//                loggedIn = false;
-////                mGoogleApiClient.connect();
-//            }
         }
         return super.onOptionsItemSelected(item);
     }
