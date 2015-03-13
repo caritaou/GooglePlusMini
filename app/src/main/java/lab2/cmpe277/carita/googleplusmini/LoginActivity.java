@@ -1,9 +1,19 @@
 package lab2.cmpe277.carita.googleplusmini;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
+
+import com.google.android.gms.plus.PlusClient;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.plusDomains.PlusDomains;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,6 +21,8 @@ import android.content.IntentSender;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.view.View;
+
+import java.io.IOException;
 
 
 public class LoginActivity extends Activity implements  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -46,6 +58,13 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
      * Keeps track if user is currently signed in
      */
     private String loggedIn = "false";
+
+    private final String SERVER_CLIENT_ID = "493596572952-nbe6uvb6k89oi62r0l82vb0gcfhn9829.apps.googleusercontent.com";
+    //Google+ Scopes
+    private final String SCOPE1 = "https://www.googleapis.com/auth/plus.me"; //Grants the app permission to use the special value me to represent the authenticated user. Does not apply to apps that use domain-wide delegation of authority.
+    private final String SCOPE2 = "https://www.googleapis.com/auth/plus.profiles.read"; //Required - Grants the app permission to read the user's public profile data as well as profile data that the authorized user is granted access to view.
+    private final String SCOPE3 = "https://www.googleapis.com/auth/plus.circles.read"; //Required - Grants the app permission to read the names of the user's circles, and the people and pages that are members of each circle.
+
     /**
      * Intent to go fom login to google plus activity, and sign out back to login activity
      */
@@ -146,9 +165,50 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
         if(loggedIn.equals("true")){
             signOut();
         }
+        Bundle appActivities = new Bundle();
+        appActivities.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES,
+                "http://schemas.google.com/AddActivity");
+//        obtain access token
+//        String accountName = Plus.AccountApi.getAccountName(mGoogleApiClient);
+//        String accountName = "carita.ou@sjsu.edu";
+//        String scopes = "oauth2:server:client_id:" + SERVER_CLIENT_ID + ":api_scope:" + SCOPE1 + " " + SCOPE2 + " " + SCOPE3;
+//        String accessToken = null;
+//        try {
+//            accessToken = GoogleAuthUtil.getToken(
+//                    this,                                              // Context context
+//                    accountName,  // String accountName
+//                    scopes,                                            // String scope
+//                    appActivities                                      // Bundle bundle
+//            );
+//        } catch (IOException transientEx) {
+//            // network or server error, the call is expected to succeed if you try again later.
+//            // Don't attempt to call again immediately - the request is likely to
+//            // fail, you'll hit quotas or back-off.
+//            return;
+//        } catch (UserRecoverableAuthException e) {
+//            // Requesting an authorization code will always throw
+//            // UserRecoverableAuthException on the first call to GoogleAuthUtil.getToken
+//            // because the user must consent to offline access to their data.  After
+//            // consent is granted control is returned to your activity in onActivityResult
+//            // and the second call to GoogleAuthUtil.getToken will succeed.
+//            startActivityForResult(e.getIntent(), RC_SIGN_IN);
+//            return;
+//        } catch (GoogleAuthException authEx) {
+//            // Failure. The call is not expected to ever succeed so it should not be
+//            // retried.
+//            return;
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+
+//        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+//        PlusDomains plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
 
         Intent activity = new Intent(getApplicationContext(), PlusActivity.class);
         activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        activity.putExtra("accessToken", accessToken);
+//        activity.putExtra("accountName", accountName);
+//        activity.putExtra("scopes", scopes);
         startActivity(activity);
     }
 

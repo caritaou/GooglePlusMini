@@ -1,5 +1,6 @@
 package lab2.cmpe277.carita.googleplusmini;
 
+import java.io.IOException;
 import java.util.Locale;
 
 
@@ -17,6 +18,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+//import com.google.android.gms.plus.model.people.Person;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.plusDomains.PlusDomains;
+import com.google.api.services.plusDomains.model.Person;
 
 
 public class PlusActivity extends ActionBarActivity implements ActionBar.TabListener {
@@ -33,11 +42,58 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //     * The {@link ViewPager} that will host the section contents.
 //     */
     ViewPager mViewPager;
+    private static PlusDomains plusDomains;
+    private static String accountName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        Intent activity = getIntent();
+//        String accessToken = activity.getExtras().getString("accessToken");
+
+
+//        accountName = activity.getStringExtra("accountName");
+//        String scopes = activity.getExtras().getString("scopes");
+//
+//        Bundle appActivities = new Bundle();
+//        appActivities.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES,
+//                "http://schemas.google.com/AddActivity");
+//
+//        String accessToken = null;
+//        try {
+//            accessToken = GoogleAuthUtil.getToken(
+//                    this,                                              // Context context
+//                    accountName,  // String accountName
+//                    scopes,                                            // String scope
+//                    appActivities                                      // Bundle bundle
+//            );
+//        } catch (IOException transientEx) {
+//            // network or server error, the call is expected to succeed if you try again later.
+//            // Don't attempt to call again immediately - the request is likely to
+//            // fail, you'll hit quotas or back-off.
+//            return;
+//        } catch (UserRecoverableAuthException e) {
+//            // Requesting an authorization code will always throw
+//            // UserRecoverableAuthException on the first call to GoogleAuthUtil.getToken
+//            // because the user must consent to offline access to their data.  After
+//            // consent is granted control is returned to your activity in onActivityResult
+//            // and the second call to GoogleAuthUtil.getToken will succeed.
+//            startActivityForResult(e.getIntent(), 0);
+//            return;
+//        } catch (GoogleAuthException authEx) {
+//            // Failure. The call is not expected to ever succeed so it should not be
+//            // retried.
+//            return;
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+//        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
+
+
 
         //Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -179,14 +235,15 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private static final String TITLE = "Friends";
+        private static final String TITLE = "Profile";
+        private Person me;
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static Friends newInstance(int sectionNumber, String title) {
-            Friends fragment = new Friends();
+        public static Profile newInstance(int sectionNumber, String title) {
+            Profile fragment = new Profile();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putString(TITLE, title);
@@ -194,13 +251,27 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             return fragment;
         }
 
-        public Profile() {
-        }
+//        public Profile() {
+//            try {
+//                me = plusDomains.people().get("me").execute();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        @Override
+//        public void onCreate(Bundle savedInstanceState) {
+//            super.onCreate(savedInstanceState);
+//
+//        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            View rootView = inflater.inflate(R.layout.profile_main, container, false);
+            TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_text);
+            tvLabel.setText("Profile");
+//            tvLabel.setText(me.getDisplayName());
             return rootView;
         }
     }
@@ -226,13 +297,21 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             return fragment;
         }
 
-        public Friends() {
-        }
+//        public Friends() {
+//        }
+//
+//        @Override
+//        public void onCreate(Bundle savedInstanceState) {
+//            super.onCreate(savedInstanceState);
+//
+//        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            View rootView = inflater.inflate(R.layout.friend_main, container, false);
+            TextView tvLabel = (TextView) rootView.findViewById(R.id.friend_text);
+            tvLabel.setText("Friends");
             return rootView;
         }
     }
@@ -259,13 +338,21 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             return fragment;
         }
 
-        public Circles() {
-        }
+//        public Circles() {
+//        }
+//
+//        @Override
+//        public void onCreate(Bundle savedInstanceState) {
+//            super.onCreate(savedInstanceState);
+//
+//        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            View rootView = inflater.inflate(R.layout.circle_main, container, false);
+            TextView tvLabel = (TextView) rootView.findViewById(R.id.circle_text);
+            tvLabel.setText("Circle");
             return rootView;
         }
     }
