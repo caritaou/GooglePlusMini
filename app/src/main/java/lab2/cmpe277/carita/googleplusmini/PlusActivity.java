@@ -1,6 +1,5 @@
 package lab2.cmpe277.carita.googleplusmini;
 
-import java.io.IOException;
 import java.util.Locale;
 
 
@@ -18,14 +17,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 //import com.google.android.gms.plus.model.people.Person;
-import com.google.android.gms.plus.Plus;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.plusDomains.PlusDomains;
+import com.google.api.services.plusDomains.model.Circle;
 import com.google.api.services.plusDomains.model.Person;
 
 
@@ -46,6 +47,9 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     private static PlusDomains plusDomains;
     private static String accountName;
     private static String accessToken;
+
+//    private static ListView_Adapter listViewAdapter;
+//    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,9 +198,9 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             // getItem is called to instantiate the fragment for the given page.
             switch (position) {
                 case 0:
-                    return Profile.newInstance(0, "Profile");
+                    return MyProfile.newInstance(0, "Profile");
                 case 1:
-                    return Circles.newInstance(1, "Circles");
+                    return MyCircles.newInstance(1, "Circles");
 //                case 2:
 //                    return Friends.newInstance(2, "Friends");
                 default:
@@ -230,7 +234,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class Profile extends Fragment {
+    public static class MyProfile extends Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -243,8 +247,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static Profile newInstance(int sectionNumber, String title) {
-            Profile fragment = new Profile();
+        public static MyProfile newInstance(int sectionNumber, String title) {
+            MyProfile fragment = new MyProfile();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putString(TITLE, title);
@@ -274,7 +278,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-    public static class Circles extends Fragment {
+    public static class MyCircles extends Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -286,8 +290,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static Circles newInstance(int sectionNumber, String title) {
-            Circles fragment = new Circles();
+        public static MyCircles newInstance(int sectionNumber, String title) {
+            MyCircles fragment = new MyCircles();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putString(TITLE, title);
@@ -299,9 +303,91 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.circle_main, container, false);
-            TextView tvLabel = (TextView) rootView.findViewById(R.id.circle_text);
-            tvLabel.setText("Circle");
+//            TextView tvLabel = (TextView) rootView.findViewById(R.id.circle_text);
+//            tvLabel.setText("Circle");
+
+            ExpandableListView list = (ExpandableListView) rootView.findViewById(R.id.listView);
+            list.setAdapter(new FriendListAdapter());
+
+//            switch(getArguments().getInt(ARG_SECTION_NUMBER)){
+//                case 1:
+//                    //The constructor ListView_Adapter(MainActivity.DummySectionFragment) is undefined
+//                    listViewAdapter = new ListView_Adapter(getActivity().getBaseContext());
+//                    ListView listView = (ListView) rootView.findViewById(R.id.listView1);
+//                    for (int i=0;i<20;i++)
+//                    {
+//                        listViewAdapter.add("this Index : "+i);
+//                    }
+//                    return listView;
+//            }
+
             return rootView;
+        }
+
+        public class FriendListAdapter extends BaseExpandableListAdapter {
+            private String[] circles = {"Friends", "Family", "Acquaintances", "Following"};
+            private Circle[] google_circles;
+            private Person[][] google_circle_list;
+            private String[][] circle_list = {
+                    {"Friend1", "Friend2", "Friend3"},
+                    {"Family1", "Family2", "Family3", "Family4"},
+                    {"Acquaintance1", "Acquaintance2", "Acquaintance3"} ,
+                    {"Following 1"}
+            };
+
+            @Override
+            public int getGroupCount() {
+                return circles.length;
+            }
+
+            @Override
+            public int getChildrenCount(int groupPosition) {
+                return circle_list[groupPosition].length;
+            }
+
+            @Override
+            public Object getGroup(int groupPosition) {
+                return circles[groupPosition];
+            }
+
+            @Override
+            public Object getChild(int groupPosition, int childPosition) {
+                return circle_list[groupPosition][childPosition];
+            }
+
+            @Override
+            public long getGroupId(int groupPosition) {
+                return groupPosition;
+            }
+
+            @Override
+            public long getChildId(int groupPosition, int childPosition) {
+                return childPosition;
+            }
+
+            @Override
+            public boolean hasStableIds() {
+                return true;
+            }
+
+            @Override
+            public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+                TextView textView = new TextView(MyCircles.this.getActivity());
+                textView.setText(getGroup(groupPosition).toString());
+                return textView;
+            }
+
+            @Override
+            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+                TextView textView = new TextView(MyCircles.this.getActivity());
+                textView.setText(getChild(groupPosition, childPosition).toString());
+                return textView;
+            }
+
+            @Override
+            public boolean isChildSelectable(int groupPosition, int childPosition) {
+                return false;
+            }
         }
     }
 
@@ -342,6 +428,49 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //            TextView tvLabel = (TextView) rootView.findViewById(R.id.friend_text);
 //            tvLabel.setText("Friends");
 //            return rootView;
+//        }
+//    }
+
+//    private class MyListViewAdapter extends ArrayAdapter<String> {
+//
+//        public MyListViewAdapter (Context c) {
+//            super(c, R.layout.list_cell);
+//        }
+//
+//        @Override
+//        public View getView(int position, View convertView, ViewGroup parent) {
+//            View row = convertView;
+//            ListView_Text holder = null;
+//
+//            if (row == null)
+//            {
+//                LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//
+//                row = inflater.inflate(R.layout.list_cell, parent, false);
+//                holder = new ListView_Text(row);
+//                row.setTag(holder);
+//            }
+//            else
+//            {
+//                holder = (ListView_Text) row.getTag();
+//            }
+//
+//            holder.populateFrom(getItem(position));
+//
+//            return row;
+//        }
+//
+//        static class ListView_Text {
+//            private TextView cell_name = null;
+//
+//            ListView_Text(View row) {
+//                cell_name = (TextView) row.findViewById(R.id.list_cell_name);
+//            }
+//
+//            void populateFrom(String index) {
+//                cell_name.setText(index);
+//            }
+//
 //        }
 //    }
 }
