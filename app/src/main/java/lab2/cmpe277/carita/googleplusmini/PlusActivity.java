@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 //import com.google.android.gms.plus.model.people.Person;
+import com.google.android.gms.plus.Plus;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -44,14 +45,15 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     ViewPager mViewPager;
     private static PlusDomains plusDomains;
     private static String accountName;
+    private static String accessToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        Intent activity = getIntent();
-//        String accessToken = activity.getExtras().getString("accessToken");
+        Intent activity = getIntent();
+        accessToken = activity.getExtras().getString("accessToken");
 
 
 //        accountName = activity.getStringExtra("accountName");
@@ -90,9 +92,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //            throw new RuntimeException(e);
 //        }
 //
-//        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-//        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
-
+        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
 
 
         //Set up the action bar.
@@ -195,9 +196,9 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                 case 0:
                     return Profile.newInstance(0, "Profile");
                 case 1:
-                    return Friends.newInstance(1, "Friends");
-                case 2:
-                    return Circles.newInstance(2, "Circles");
+                    return Circles.newInstance(1, "Circles");
+//                case 2:
+//                    return Friends.newInstance(2, "Friends");
                 default:
                     return null;
             }
@@ -207,7 +208,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 2;
         }
 
         @Override
@@ -218,8 +219,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                     return getString(R.string.title_section1).toUpperCase(l);
                 case 1:
                     return getString(R.string.title_section2).toUpperCase(l);
-                case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
+//                case 2:
+//                    return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
         }
@@ -258,64 +259,20 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //                e.printStackTrace();
 //            }
 //        }
-//
-//        @Override
-//        public void onCreate(Bundle savedInstanceState) {
-//            super.onCreate(savedInstanceState);
-//
-//        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.profile_main, container, false);
             TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_text);
-            tvLabel.setText("Profile");
-//            tvLabel.setText(me.getDisplayName());
+            tvLabel.setText("Profile ");
+//            tvLabel.append(accountName);
+            if (accessToken != null) {
+                tvLabel.append(accessToken);
+            }
             return rootView;
         }
     }
-
-    public static class Friends extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-        private static final String TITLE = "Friends";
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static Friends newInstance(int sectionNumber, String title) {
-            Friends fragment = new Friends();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            args.putString(TITLE, title);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-//        public Friends() {
-//        }
-//
-//        @Override
-//        public void onCreate(Bundle savedInstanceState) {
-//            super.onCreate(savedInstanceState);
-//
-//        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.friend_main, container, false);
-            TextView tvLabel = (TextView) rootView.findViewById(R.id.friend_text);
-            tvLabel.setText("Friends");
-            return rootView;
-        }
-    }
-
 
     public static class Circles extends Fragment {
         /**
@@ -338,15 +295,6 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             return fragment;
         }
 
-//        public Circles() {
-//        }
-//
-//        @Override
-//        public void onCreate(Bundle savedInstanceState) {
-//            super.onCreate(savedInstanceState);
-//
-//        }
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -356,4 +304,44 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             return rootView;
         }
     }
+
+//    public static class Friends extends Fragment {
+//        /**
+//         * The fragment argument representing the section number for this
+//         * fragment.
+//         */
+//        private static final String ARG_SECTION_NUMBER = "section_number";
+//        private static final String TITLE = "Friends";
+//
+//        /**
+//         * Returns a new instance of this fragment for the given section
+//         * number.
+//         */
+//        public static Friends newInstance(int sectionNumber, String title) {
+//            Friends fragment = new Friends();
+//            Bundle args = new Bundle();
+//            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+//            args.putString(TITLE, title);
+//            fragment.setArguments(args);
+//            return fragment;
+//        }
+//
+////        public Friends() {
+////        }
+////
+////        @Override
+////        public void onCreate(Bundle savedInstanceState) {
+////            super.onCreate(savedInstanceState);
+////
+////        }
+//
+//        @Override
+//        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+//                                 Bundle savedInstanceState) {
+//            View rootView = inflater.inflate(R.layout.friend_main, container, false);
+//            TextView tvLabel = (TextView) rootView.findViewById(R.id.friend_text);
+//            tvLabel.setText("Friends");
+//            return rootView;
+//        }
+//    }
 }
