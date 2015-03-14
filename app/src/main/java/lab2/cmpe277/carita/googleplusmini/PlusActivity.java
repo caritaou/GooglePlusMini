@@ -3,6 +3,7 @@ package lab2.cmpe277.carita.googleplusmini;
 import java.util.Locale;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.CheckedTextView;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
@@ -303,28 +305,14 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.circle_main, container, false);
-//            TextView tvLabel = (TextView) rootView.findViewById(R.id.circle_text);
-//            tvLabel.setText("Circle");
-
             ExpandableListView list = (ExpandableListView) rootView.findViewById(R.id.listView);
-            list.setAdapter(new FriendListAdapter());
-
-//            switch(getArguments().getInt(ARG_SECTION_NUMBER)){
-//                case 1:
-//                    //The constructor ListView_Adapter(MainActivity.DummySectionFragment) is undefined
-//                    listViewAdapter = new ListView_Adapter(getActivity().getBaseContext());
-//                    ListView listView = (ListView) rootView.findViewById(R.id.listView1);
-//                    for (int i=0;i<20;i++)
-//                    {
-//                        listViewAdapter.add("this Index : "+i);
-//                    }
-//                    return listView;
-//            }
-
+            list.setAdapter(new FriendListAdapter(this.getActivity()));
             return rootView;
         }
 
         public class FriendListAdapter extends BaseExpandableListAdapter {
+            public LayoutInflater inflater;
+            public Activity activity;
             private String[] circles = {"Friends", "Family", "Acquaintances", "Following"};
             private Circle[] google_circles;
             private Person[][] google_circle_list;
@@ -334,6 +322,11 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                     {"Acquaintance1", "Acquaintance2", "Acquaintance3"} ,
                     {"Following 1"}
             };
+
+            public FriendListAdapter (Activity activity) {
+                this.activity = activity;
+                inflater = activity.getLayoutInflater();
+            }
 
             @Override
             public int getGroupCount() {
@@ -372,16 +365,30 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
             @Override
             public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-                TextView textView = new TextView(MyCircles.this.getActivity());
-                textView.setText(getGroup(groupPosition).toString());
-                return textView;
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.circle_list, null);
+                }
+
+                ((CheckedTextView) convertView).setText(getGroup(groupPosition).toString());
+                ((CheckedTextView) convertView).setChecked(isExpanded);
+                return convertView;
+//                TextView textView = new TextView(MyCircles.this.getActivity());
+//                textView.setText(getGroup(groupPosition).toString());
+//                return textView;
             }
 
             @Override
             public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-                TextView textView = new TextView(MyCircles.this.getActivity());
+//                TextView textView = new TextView(MyCircles.this.getActivity());
+                TextView textView = null;
+
+                if (convertView == null) {
+                    convertView = inflater.inflate(R.layout.entry, null);
+                }
+
+                textView = (TextView) convertView.findViewById(R.id.entry);
                 textView.setText(getChild(groupPosition, childPosition).toString());
-                return textView;
+                return convertView;
             }
 
             @Override
