@@ -270,8 +270,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.profile_main, container, false);
-            TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_text);
-            tvLabel.setText("Profile ");
+            TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_info);
+            tvLabel.setText("Person's profile information");
 //            tvLabel.append(accountName);
             if (accessToken != null) {
                 tvLabel.append(accessToken);
