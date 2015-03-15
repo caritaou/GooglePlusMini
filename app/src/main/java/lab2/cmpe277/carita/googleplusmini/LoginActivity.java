@@ -2,8 +2,10 @@ package lab2.cmpe277.carita.googleplusmini;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -12,19 +14,26 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.PlusClient;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.plusDomains.PlusDomains;
+import com.google.api.services.plusDomains.model.Person;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 
 public class LoginActivity extends Activity implements  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -61,13 +70,18 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
      */
     private String loggedIn = "false";
 
-    private final String SERVER_CLIENT_ID = "493596572952-nbe6uvb6k89oi62r0l82vb0gcfhn9829.apps.googleusercontent.com";
+//    private final String SERVER_CLIENT_ID = "493596572952-nbe6uvb6k89oi62r0l82vb0gcfhn9829.apps.googleusercontent.com";
+    private final String SERVER_CLIENT_ID = "493596572952-32n73ep7k3cmin32uv89kr0pcn55nsb4.apps.googleusercontent.com";
+    private final String SERVICE_CLIENT_ID = "493596572952-samut4amsfj17l8lf6t5si398tv4tm67.apps.googleusercontent.com";
     //Google+ Scopes
     private final String SCOPE1 = "https://www.googleapis.com/auth/plus.me"; //Grants the app permission to use the special value me to represent the authenticated user. Does not apply to apps that use domain-wide delegation of authority.
     private final String SCOPE2 = "https://www.googleapis.com/auth/plus.profiles.read"; //Required - Grants the app permission to read the user's public profile data as well as profile data that the authorized user is granted access to view.
     private final String SCOPE3 = "https://www.googleapis.com/auth/plus.circles.read"; //Required - Grants the app permission to read the names of the user's circles, and the people and pages that are members of each circle.
+    private final String SCOPE4 = "https://www.googleapis.com/auth/userinfo.profile";
+    private final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
     public String accessToken = null;
-//    private String accountName;
+    private String accountName = null;
+    private String about = null;
 
 //    static final int AUTH_CODE_REQUEST_CODE = 1;
     /**
@@ -182,16 +196,12 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
             signOut();
         }
 
-        task.execute();
-//        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-//        PlusDomains plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
-
         mIntentInProgress = true;
+        task.execute();
         Intent activity = new Intent(getApplicationContext(), PlusActivity.class);
         activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activity.putExtra("accessToken", accessToken);
-//        activity.putExtra("accountName", accountName);
-//        activity.putExtra("scopes", scopes);
+        activity.putExtra("about", about);
         startActivity(activity);
     }
 
@@ -209,39 +219,59 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
     AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
         @Override
         protected String doInBackground(Void... params) {
-//            Bundle appActivities = new Bundle();
-//            appActivities.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES,
-//                    "http://schemas.google.com/AddActivity");
-
 //        obtain access token
-            String accountName = Plus.AccountApi.getAccountName(mGoogleApiClient);
-            String scopes = "oauth2:server:client_id:" + SERVER_CLIENT_ID + ":api_scope:" + SCOPE1 + " " + SCOPE2 + " " + SCOPE3;
+            accountName = Plus.AccountApi.getAccountName(mGoogleApiClient);
+//            String scopes = "oauth2:server:client_id:" + SERVER_CLIENT_ID + ":api_scope:" + SCOPE1 + " " + SCOPE2 + " " + SCOPE3;
+//            String scopes = "oauth2:server:client_id:" + SERVER_CLIENT_ID + ":" + SCOPE1 + " " + SCOPE2 + " " + SCOPE3;
+//            String scopes = "oauth2:server:client_id:AIzaSyA0-gcjGOCvtR3bR2XmhuPqOG4A5QS9TUo:"+ SCOPE1 + " " + SCOPE2 + " " + SCOPE3;
+//            String scopes = "oauth2:" + Scopes.PLUS_LOGIN + " " + Scopes.PLUS_ME + " " + Scopes.PROFILE ;
+            String scopes = "oauth2:" + SCOPE1 + " " + SCOPE2 + " " + SCOPE3 + " " + SCOPE4;
 
             try {
                 accessToken = GoogleAuthUtil.getToken(
                         getApplicationContext(),                                              // Context context
                         accountName,  // String accountName
                         scopes                                            // String scope
-//                    appActivities                                      // Bundle bundle
+//                        appActivities                                      // Bundle bundle
                 );
+
+                if (accessToken == null){
+                    Log.w("NO_ACCESS_TOKEN", "null access token: " + accessToken);
+                }
+
+                GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+                PlusDomains plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).setApplicationName("GooglePlusMini").build();
+
+                Person mePerson = plusDomains.people().get("me").execute();
+                about = mePerson.getAboutMe();
+//
+//                Intent activity = new Intent(getApplicationContext(), PlusActivity.class);
+//                activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                activity.putExtra("accessToken", accessToken);
+//                activity.putExtra("accountName", accountName);
+//                activity.putExtra("about", about);
+//                startActivity(activity);
+
             } catch (IOException transientEx) {
                 // network or server error, the call is expected to succeed if you try again later.
                 // Don't attempt to call again immediately - the request is likely to
                 // fail, you'll hit quotas or back-off.
 //                return;
+                Log.e("IOException", "Unrecoverable I/O exception: " + transientEx.getMessage(), transientEx);
             } catch (UserRecoverableAuthException e) {
                 // Requesting an authorization code will always throw
                 // UserRecoverableAuthException on the first call to GoogleAuthUtil.getToken
                 // because the user must consent to offline access to their data.  After
                 // consent is granted control is returned to your activity in onActivityResult
                 // and the second call to GoogleAuthUtil.getToken will succeed.
+                Log.w("UserRecoverableAuthException","Error retrieving the token: " + e.getMessage());
                 startActivityForResult(e.getIntent(), RESULT_OK);
                 e.printStackTrace();
 //                return;
             } catch (GoogleAuthException authEx) {
                 // Failure. The call is not expected to ever succeed so it should not be
                 // retried.
-                signOut();
+                Log.e("GoogleAuthException", "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
                 authEx.getStackTrace();
 //                return;
             } catch (Exception e) {

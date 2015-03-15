@@ -25,5 +25,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:6.5.87'
     compile 'com.google.api-client:google-api-client:1.18.0-rc'
     compile 'com.google.http-client:google-http-client-jackson2:1.18.0-rc'
-    compile 'com.google.apis:google-api-services-plusDomains:v1-rev7-1.17.0-rc'
+    compile 'com.google.apis:google-api-services-plusDomains:v1-rev117-1.19.1'
 }

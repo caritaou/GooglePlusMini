@@ -15,5 +15,6 @@
     android:layout_marginLeft="10dp"
     android:gravity="left"
     android:paddingLeft="32dp"
+    android:focusable="false"
     android:textSize="20sp"
     android:textStyle="bold" />

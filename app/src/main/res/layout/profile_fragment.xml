@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
         android:gravity="center"
-        android:text="Occupation\nOrganization\About Me"
+        android:text="Occupation\nOrganization\nAbout Me"
         android:textSize="20sp"/>
 
     <Button

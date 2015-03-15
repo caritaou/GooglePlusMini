@@ -1,10 +1,12 @@
 package lab2.cmpe277.carita.googleplusmini;
 
+import java.io.IOException;
 import java.util.Locale;
 
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -33,7 +35,7 @@ import com.google.api.services.plusDomains.model.Circle;
 import com.google.api.services.plusDomains.model.Person;
 
 
-public class PlusActivity extends ActionBarActivity implements ActionBar.TabListener {
+public class PlusActivity extends ActionBarActivity implements ActionBar.TabListener  {
 //    /**
 //     * The {@link android.support.v4.view.PagerAdapter} that will provide
 //     * fragments for each of the sections. We use a
@@ -50,6 +52,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     private static PlusDomains plusDomains;
     private static String accountName;
     private static String accessToken;
+    private static String about;
+    private Person me;
 
 //    private static ListView_Adapter listViewAdapter;
 //    private ListView listView;
@@ -61,47 +65,14 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
         Intent activity = getIntent();
         accessToken = activity.getExtras().getString("accessToken");
+//        accountName = activity.getExtras().getString("accountName");
+        about = activity.getExtras().getString("about");
+
+//        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+//        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
 
 
-//        accountName = activity.getStringExtra("accountName");
-//        String scopes = activity.getExtras().getString("scopes");
-//
-//        Bundle appActivities = new Bundle();
-//        appActivities.putString(GoogleAuthUtil.KEY_REQUEST_VISIBLE_ACTIVITIES,
-//                "http://schemas.google.com/AddActivity");
-//
-//        String accessToken = null;
-//        try {
-//            accessToken = GoogleAuthUtil.getToken(
-//                    this,                                              // Context context
-//                    accountName,  // String accountName
-//                    scopes,                                            // String scope
-//                    appActivities                                      // Bundle bundle
-//            );
-//        } catch (IOException transientEx) {
-//            // network or server error, the call is expected to succeed if you try again later.
-//            // Don't attempt to call again immediately - the request is likely to
-//            // fail, you'll hit quotas or back-off.
-//            return;
-//        } catch (UserRecoverableAuthException e) {
-//            // Requesting an authorization code will always throw
-//            // UserRecoverableAuthException on the first call to GoogleAuthUtil.getToken
-//            // because the user must consent to offline access to their data.  After
-//            // consent is granted control is returned to your activity in onActivityResult
-//            // and the second call to GoogleAuthUtil.getToken will succeed.
-//            startActivityForResult(e.getIntent(), 0);
-//            return;
-//        } catch (GoogleAuthException authEx) {
-//            // Failure. The call is not expected to ever succeed so it should not be
-//            // retried.
-//            return;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//
-        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
-
+//        getMe.execute();
 
         //Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -244,6 +215,18 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
 
+//    AsyncTask<Void, Void, String> getMe = new AsyncTask<Void, Void, String>() {
+//        @Override
+//        protected String doInBackground(Void... params) {
+//            try {
+//                me = plusDomains.people().get("me").execute();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
+//    };
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -269,27 +252,45 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             return fragment;
         }
 
-//        public Profile() {
-//            try {
-//                me = plusDomains.people().get("me").execute();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.profile_main, container, false);
+            View rootView = inflater.inflate(R.layout.profile_fragment, container, false);
 
             TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_info);
-            tvLabel.setText("Person's profile information");
-//            tvLabel.append(accountName);
+            tvLabel.setText("Person's profile information\n");
+
+            if(me != null) {
+                tvLabel.append(me.getDisplayName());
+                tvLabel.append(me.getAboutMe());
+            }
+            else {
+                tvLabel.append("me is null");
+            }
+
             if (accessToken != null) {
-                tvLabel.append(accessToken);
+                tvLabel.append("accessToken" + accessToken);
+            }
+            else{
+                tvLabel.append("token is null");
+            }
+
+            if (about != null) {
+                tvLabel.append("about" + about);
+            }
+            else{
+                tvLabel.append("about is null");
+            }
+
+            if (accountName != null) {
+                tvLabel.append("accountName" + accountName);
+            }
+            else{
+                tvLabel.append("accountName is null");
             }
 
             Button email = (Button) rootView.findViewById(R.id.button_email);
+            email.setVisibility(View.INVISIBLE);    //Hide button on user's own profile
             email.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -325,11 +326,20 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.circle_main, container, false);
             ExpandableListView list = (ExpandableListView) rootView.findViewById(R.id.listView);
             list.setAdapter(new FriendListAdapter(this.getActivity()));
+            list.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                    Intent activity = new Intent(parent.getContext(), FriendProfile.class);
+                    activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(activity);
+                    return true;
+                }
+            });
             return rootView;
         }
 
@@ -395,9 +405,6 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                 ((CheckedTextView) convertView).setText(getGroup(groupPosition).toString());
                 ((CheckedTextView) convertView).setChecked(isExpanded);
                 return convertView;
-//                TextView textView = new TextView(MyCircles.this.getActivity());
-//                textView.setText(getGroup(groupPosition).toString());
-//                return textView;
             }
 
             @Override
@@ -409,6 +416,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                     convertView = inflater.inflate(R.layout.entry, null);
                 }
 
+                convertView.setClickable(false);
                 textView = (TextView) convertView.findViewById(R.id.entry);
                 textView.setText(getChild(groupPosition, childPosition).toString());
                 return convertView;
@@ -416,91 +424,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
             @Override
             public boolean isChildSelectable(int groupPosition, int childPosition) {
-                return false;
+                return true;
             }
         }
     }
-
-//    public static class Friends extends Fragment {
-//        /**
-//         * The fragment argument representing the section number for this
-//         * fragment.
-//         */
-//        private static final String ARG_SECTION_NUMBER = "section_number";
-//        private static final String TITLE = "Friends";
-//
-//        /**
-//         * Returns a new instance of this fragment for the given section
-//         * number.
-//         */
-//        public static Friends newInstance(int sectionNumber, String title) {
-//            Friends fragment = new Friends();
-//            Bundle args = new Bundle();
-//            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-//            args.putString(TITLE, title);
-//            fragment.setArguments(args);
-//            return fragment;
-//        }
-//
-////        public Friends() {
-////        }
-////
-////        @Override
-////        public void onCreate(Bundle savedInstanceState) {
-////            super.onCreate(savedInstanceState);
-////
-////        }
-//
-//        @Override
-//        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-//                                 Bundle savedInstanceState) {
-//            View rootView = inflater.inflate(R.layout.friend_main, container, false);
-//            TextView tvLabel = (TextView) rootView.findViewById(R.id.friend_text);
-//            tvLabel.setText("Friends");
-//            return rootView;
-//        }
-//    }
-
-//    private class MyListViewAdapter extends ArrayAdapter<String> {
-//
-//        public MyListViewAdapter (Context c) {
-//            super(c, R.layout.list_cell);
-//        }
-//
-//        @Override
-//        public View getView(int position, View convertView, ViewGroup parent) {
-//            View row = convertView;
-//            ListView_Text holder = null;
-//
-//            if (row == null)
-//            {
-//                LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//
-//                row = inflater.inflate(R.layout.list_cell, parent, false);
-//                holder = new ListView_Text(row);
-//                row.setTag(holder);
-//            }
-//            else
-//            {
-//                holder = (ListView_Text) row.getTag();
-//            }
-//
-//            holder.populateFrom(getItem(position));
-//
-//            return row;
-//        }
-//
-//        static class ListView_Text {
-//            private TextView cell_name = null;
-//
-//            ListView_Text(View row) {
-//                cell_name = (TextView) row.findViewById(R.id.list_cell_name);
-//            }
-//
-//            void populateFrom(String index) {
-//                cell_name.setText(index);
-//            }
-//
-//        }
-//    }
 }
