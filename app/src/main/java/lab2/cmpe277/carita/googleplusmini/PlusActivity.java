@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
@@ -136,6 +137,16 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        Intent activity = new Intent(getApplicationContext(), LoginActivity.class);
+        activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(activity);
+        finish();
     }
 
     @Override
@@ -270,12 +281,24 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.profile_main, container, false);
+
             TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_info);
             tvLabel.setText("Person's profile information");
 //            tvLabel.append(accountName);
             if (accessToken != null) {
                 tvLabel.append(accessToken);
             }
+
+            Button email = (Button) rootView.findViewById(R.id.button_email);
+            email.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("message/rfc822");
+                    startActivity(Intent.createChooser(emailIntent, "Choose an Email Client:"));
+                }
+            });
+
             return rootView;
         }
     }

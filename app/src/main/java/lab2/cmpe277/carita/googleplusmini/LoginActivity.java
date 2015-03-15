@@ -186,6 +186,7 @@ public class LoginActivity extends Activity implements  GoogleApiClient.Connecti
 //        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
 //        PlusDomains plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
 
+        mIntentInProgress = true;
         Intent activity = new Intent(getApplicationContext(), PlusActivity.class);
         activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activity.putExtra("accessToken", accessToken);
