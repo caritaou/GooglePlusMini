@@ -7,16 +7,55 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.api.services.plusDomains.model.Person;
 
 
 public class FriendProfile extends ActionBarActivity {
+    String friendDisplayName;
+    String friendOrganizations = "";
+    String friendAboutMe;
+    String friendImage_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile_fragment);
+
+        Intent activity = getIntent();
+        friendAboutMe = activity.getExtras().getString("friendAboutMe");
+        friendOrganizations = activity.getExtras().getString("friendOrganizations");
+        friendDisplayName = activity.getExtras().getString("friendDisplayName");
+        friendImage_url = activity.getExtras().getString("friendImage_url");
+
+        TextView profile_name = (TextView) findViewById(R.id.profile_name);
+        if (friendDisplayName != null) {
+            profile_name.setText(friendDisplayName);
+        }
+        else{
+            friendDisplayName = "User";
+            profile_name.setText("User does not have a displayName");
+        }
+
+        TextView profile_info = (TextView) findViewById(R.id.profile_info);
+        ImageView iv = (ImageView) findViewById(R.id.icon);
+        new LoadImage(friendImage_url, iv);
+
+        if (friendOrganizations != null) {
+            profile_info.setText("Organizations: " + friendOrganizations + "\n");
+        }
+        else{
+            profile_info.setText(friendDisplayName + " is not part of an organizations" + "\n");
+        }
+
+        if (friendAboutMe != null) {
+            profile_info.append("About " + friendDisplayName + ": " + friendAboutMe + "\n");
+        }
+        else{
+            profile_info.append(friendDisplayName + " does not have an About Me description" + "\n");
+        }
 
         Button email = (Button) findViewById(R.id.button_email);
         email.setOnClickListener(new View.OnClickListener() {

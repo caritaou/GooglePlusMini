@@ -65,6 +65,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
     private static String[] circle_list;
     private static String[][] circle_children_list;
+    private static Person[][] circle_children_people;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         setContentView(R.layout.activity_main);
 
         Intent activity = getIntent();
-        Bundle b = activity.getExtras();
+//        Bundle b = activity.getExtras();
         accessToken = activity.getExtras().getString("accessToken");
 
         aboutMe = activity.getExtras().getString("aboutMe");
@@ -84,6 +85,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //        circle_children_list = (String[][]) b.getSerializable("circle_children");
 
         circle_children_list = GetUsernameTask.getArray();
+        circle_children_people = GetUsernameTask.getCircle_children_people();
 
         //test
 //        for (int a = 0; a < circle_children_list.length; a++){
@@ -340,16 +342,6 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             }
 
             TextView profile_info = (TextView) rootView.findViewById(R.id.profile_info);
-//            profile_info.setText("Person's profile information\n");
-
-//            if(me != null) {
-//                profile_info.append(me.getDisplayName());
-//                profile_info.append(me.getAboutMe());
-//            }
-//            else {
-//                profile_info.append("me is null");
-//            }
-
             ImageView iv = (ImageView) rootView.findViewById(R.id.icon);
             new LoadImage(image_url, iv);
 
@@ -412,8 +404,43 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             list.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
                 @Override
                 public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                    String friendDisplayName;
+                    String friendOrganizations = "";
+                    String friendAboutMe;
+                    String friendImage_url;
+
                     Intent activity = new Intent(parent.getContext(), FriendProfile.class);
                     activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                    Person friend = circle_children_people[groupPosition][childPosition];
+                    if (friend != null) {
+                        System.out.println(friend);
+                    }
+                    if(friend.getDisplayName() != null) {
+                        friendDisplayName = friend.getDisplayName();
+                        activity.putExtra("friendDisplayName", friendDisplayName);
+                        System.out.println("friendDisplayName " + friendDisplayName);
+                    }
+                    if(friend.getOrganizations() != null) {
+                        List<Person.Organizations> tmp = friend.getOrganizations();
+                        for (Person.Organizations o: tmp){
+                            friendOrganizations = organizations + " " + o.getName() + ",";
+                        }
+                        friendOrganizations = friendOrganizations.substring(0, friendOrganizations.length()-1); //remove the last comma
+                        activity.putExtra("friendOrganizations", friendOrganizations);
+                        System.out.println("friendOrganizations " + friendOrganizations);
+                    }
+                    if(friend.getTagline() != null) {
+                        friendAboutMe = friend.getTagline();
+                        activity.putExtra("friendAboutMe", friendAboutMe);
+                        System.out.println("friendAboutMe " + friendAboutMe);
+                    }
+                    if(friend.getImage() != null){
+                        friendImage_url = friend.getImage().getUrl();
+                        activity.putExtra("friendImage_url", friendImage_url);
+                        System.out.println("friendImage_url " + friendImage_url);
+                    }
+
                     startActivity(activity);
                     return true;
                 }

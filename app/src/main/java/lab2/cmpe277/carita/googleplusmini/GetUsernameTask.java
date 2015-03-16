@@ -48,6 +48,7 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
     //MyCircles
     String[] circle_list;
     static String[][] circle_children;
+    static Person[][] circle_children_people;
     PlusDomains.Circles.List listCircles;
     CircleFeed circleFeed;
     List<Circle> circles;
@@ -117,6 +118,7 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
                     circles = circleFeed.getItems();
                     circle_list = new String[circles.size()];
                     circle_children = new String[circles.size()][];
+                    circle_children_people = new Person[circles.size()][];
 
                     while (circles != null) {
                         int i = 0;
@@ -131,16 +133,19 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
 
                             if(peopleFeed.getItems() != null && peopleFeed.getItems().size() > 0 ) {
                                 circle_children[i] = new String[peopleFeed.getItems().size()];
+                                circle_children_people[i] = new Person[peopleFeed.getItems().size()];
                                 int j = 0;
                                 for(Person person : peopleFeed.getItems()) {
                                     System.out.println("\t" + person.getDisplayName());
                                     circle_children[i][j] = person.getDisplayName();
+                                    circle_children_people[i][j] = person;
                                     j++;
                                 }
 //                                circle_children[i] = tmp;
                             }
                             else {
                                 circle_children[i] = new String[0];
+                                circle_children_people[i] = new Person[0];
                             }
 //                            System.out.println(circle.getDisplayName());
 //                            System.out.println(circle_list[i]);
@@ -149,12 +154,12 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
 
 
                         //test
-//                        for (int a = 0; a < circle_children.length; a++){
-//                            for(int b = 0; b < circle_children[a].length; b++){
-//                                System.out.print(a+ ":"+ b + " " + circle_children[a][b]);
-//                            }
-//                            System.out.println("\n" +circle_children[a].length);
-//                        }
+                        for (int a = 0; a < circle_children_people.length; a++){
+                            for(int b = 0; b < circle_children_people[a].length; b++){
+                                System.out.print(a+ ":"+ b + " " + circle_children_people[a][b]);
+                            }
+                            System.out.println("\n" +circle_children_people[a].length);
+                        }
 
 
                         // When the next page token is null, there are no additional pages of
@@ -214,6 +219,10 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
 
     public static String[][] getArray() {
         return circle_children;
+    }
+
+    public static Person[][] getCircle_children_people(){
+        return circle_children_people;
     }
     /**
      * Gets an authentication token from Google and handles any
