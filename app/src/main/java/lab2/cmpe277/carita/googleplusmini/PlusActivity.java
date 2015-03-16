@@ -1,10 +1,13 @@
 package lab2.cmpe277.carita.googleplusmini;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -32,6 +35,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.plusDomains.PlusDomains;
 import com.google.api.services.plusDomains.model.Circle;
+import com.google.api.services.plusDomains.model.CircleFeed;
 import com.google.api.services.plusDomains.model.Person;
 
 
@@ -49,14 +53,17 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //     * The {@link ViewPager} that will host the section contents.
 //     */
     ViewPager mViewPager;
-    private static PlusDomains plusDomains;
+//    private static PlusDomains plusDomains;
 //    private static String accountName;
     private static String accessToken;
-//    private static String about;
-    private Person me = null;
 
-//    private static ListView_Adapter listViewAdapter;
-//    private ListView listView;
+    private static String displayName;
+    private static String occupation;
+    private static String organization;
+    private static String about;
+    private Person me = null;
+    private static String[] circle_list;
+    private static String[][] circle_children_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,13 +71,16 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         setContentView(R.layout.activity_main);
 
         Intent activity = getIntent();
-//        accessToken = activity.getExtras().getString("accessToken");
+        Bundle b = activity.getExtras();
+        accessToken = activity.getExtras().getString("accessToken");
 //        accountName = activity.getExtras().getString("accountName");
-//        about = activity.getExtras().getString("about");
+        about = activity.getExtras().getString("about");
+        displayName = activity.getExtras().getString("displayName");
+        circle_list = activity.getStringArrayExtra("circle_list");
+        circle_children_list = (String[][]) b.getSerializable("circle_children");
 
 //        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
 //        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
-
 
 //        getMe.execute();
 
@@ -215,17 +225,66 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
 
-    AsyncTask<Void, Void, String> getMe = new AsyncTask<Void, Void, String>() {
-        @Override
-        protected String doInBackground(Void... params) {
-            try {
-                me = plusDomains.people().get("me").execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    };
+//    AsyncTask<Void, Void, String> getMe = new AsyncTask<Void, Void, String>() {
+//        private ProgressDialog dialog;
+//        @Override
+//        protected void onPreExecute() {
+//            dialog = new ProgressDialog();
+//            dialog.setMessage("Logging In...");
+//            dialog.show();
+//        }
+//
+//        @Override
+//        protected String doInBackground(Void... params) {
+//            try {
+//                me = plusDomains.people().get("me").execute();
+//                myCircles = plusDomains.circles().list("me");
+//                circleFeed = myCircles.execute();
+//                circle_list = circleFeed.getItems();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String result) {
+//            //Set up the action bar.
+//            final ActionBar actionBar = getSupportActionBar();
+//            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+//            actionBar.setHomeButtonEnabled(true);
+//
+//            // Create the adapter that will return a fragment for each of the three
+//            // primary sections of the activity.
+//            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+//
+//            // Set up the ViewPager with the sections adapter.
+//            mViewPager = (ViewPager) findViewById(R.id.pager);
+//            mViewPager.setAdapter(mSectionsPagerAdapter);
+//
+//            // When swiping between different sections, select the corresponding
+//            // tab. We can also use ActionBar.Tab#select() to do this if we have
+//            // a reference to the Tab.
+//            mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+//                @Override
+//                public void onPageSelected(int position) {
+//                    actionBar.setSelectedNavigationItem(position);
+//                }
+//            });
+//
+//            // For each of the sections in the app, add a tab to the action bar.
+//            for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+//                // Create a tab with text corresponding to the page title defined by
+//                // the adapter. Also specify this Activity object, which implements
+//                // the TabListener interface, as the callback (listener) for when
+//                // this tab is selected.
+//                actionBar.addTab(
+//                        actionBar.newTab()
+//                                .setText(mSectionsPagerAdapter.getPageTitle(i))
+//                                .setTabListener(PlusActivity.this));
+//            }
+//        }
+//    };
 
     /**
      * A placeholder fragment containing a simple view.
@@ -237,7 +296,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String TITLE = "Profile";
-        private Person me;
+//        private Person me;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -260,34 +319,34 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_info);
             tvLabel.setText("Person's profile information\n");
 
-            if(me != null) {
-                tvLabel.append(me.getDisplayName());
-                tvLabel.append(me.getAboutMe());
-            }
-            else {
-                tvLabel.append("me is null");
-            }
+//            if(me != null) {
+//                tvLabel.append(me.getDisplayName());
+//                tvLabel.append(me.getAboutMe());
+//            }
+//            else {
+//                tvLabel.append("me is null");
+//            }
 
-            if (accessToken != null) {
-                tvLabel.append("accessToken" + accessToken);
+//            if (accessToken != null) {
+//                tvLabel.append("accessToken" + accessToken);
+//            }
+//            else{
+//                tvLabel.append("token is null");
+//            }
+//
+            if (about != null) {
+                tvLabel.append("about" + about);
             }
             else{
-                tvLabel.append("token is null");
+                tvLabel.append("User does not have an About Me description");
             }
-//
-//            if (about != null) {
-//                tvLabel.append("about" + about);
-//            }
-//            else{
-//                tvLabel.append("about is null");
-//            }
-//
-//            if (accountName != null) {
-//                tvLabel.append("accountName" + accountName);
-//            }
-//            else{
-//                tvLabel.append("accountName is null");
-//            }
+
+            if (displayName != null) {
+                tvLabel.append("accountName" + displayName);
+            }
+            else{
+                tvLabel.append("User does not have a displayName");
+            }
 
             Button email = (Button) rootView.findViewById(R.id.button_email);
             email.setVisibility(View.INVISIBLE);    //Hide button on user's own profile
@@ -346,15 +405,15 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         public class FriendListAdapter extends BaseExpandableListAdapter {
             public LayoutInflater inflater;
             public Activity activity;
-            private String[] circles = {"Friends", "Family", "Acquaintances", "Following"};
-            private Circle[] google_circles;
-            private Person[][] google_circle_list;
-            private String[][] circle_list = {
-                    {"Friend1", "Friend2", "Friend3"},
-                    {"Family1", "Family2", "Family3", "Family4"},
-                    {"Acquaintance1", "Acquaintance2", "Acquaintance3"} ,
-                    {"Following 1"}
-            };
+//            private String[] circles = {"Friends", "Family", "Acquaintances", "Following"};
+            private String[] circles = circle_list;
+            private String[][] circle_children = circle_children_list;
+//            private String[][] circle_children = {
+//                    {"Friend1", "Friend2", "Friend3"},
+//                    {"Family1", "Family2", "Family3", "Family4"},
+//                    {"Acquaintance1", "Acquaintance2", "Acquaintance3"} ,
+//                    {"Following 1"}
+//            };
 
             public FriendListAdapter (Activity activity) {
                 this.activity = activity;
@@ -368,7 +427,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
             @Override
             public int getChildrenCount(int groupPosition) {
-                return circle_list[groupPosition].length;
+                return circle_children[groupPosition].length;
             }
 
             @Override
@@ -378,7 +437,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
             @Override
             public Object getChild(int groupPosition, int childPosition) {
-                return circle_list[groupPosition][childPosition];
+                return circle_children[groupPosition][childPosition];
             }
 
             @Override

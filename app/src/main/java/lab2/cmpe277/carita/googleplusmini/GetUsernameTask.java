@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -14,9 +15,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.plusDomains.PlusDomains;
+import com.google.api.services.plusDomains.model.Circle;
+import com.google.api.services.plusDomains.model.CircleFeed;
+import com.google.api.services.plusDomains.model.PeopleFeed;
 import com.google.api.services.plusDomains.model.Person;
 
 import java.io.IOException;
+import java.util.List;
 
 public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
     /** progress dialog to show user that the backup is processing. */
@@ -26,6 +31,21 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
     private Context context;
     String mScope;
     String mEmail;
+    String token;
+
+    //Person
+    Person me;
+    String displayName;
+    String occupation;
+    String aboutMe;
+
+    //MyCircles
+    String[] circle_list;
+    String[][] circle_children;
+    PlusDomains.Circles.List listCircles;
+    CircleFeed circleFeed;
+    List<Circle> circles;
+    PlusDomains.People.ListByCircle listPeople;
 
     GetUsernameTask(LoginActivity activity, String name, String scope) {
         this.mActivity = activity;
@@ -40,17 +60,6 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
         dialog.show();
     }
 
-    @Override
-    protected void onPostExecute(final Boolean success) {
-        if (dialog.isShowing()) {
-            dialog.dismiss();
-        }
-
-        Intent activity = new Intent(context, PlusActivity.class);
-        activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        activity.putExtra("accessToken", accessToken);
-        context.startActivity(activity);
-    }
     /**
      * Executes the asynchronous job. This runs when you call execute()
      * on the AsyncTask instance.
@@ -58,22 +67,73 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
     @Override
     protected Boolean doInBackground(String... params) {
         try {
-            String token = fetchToken();
+            token = fetchToken();
             if (token != null) {
                 System.out.println(token);
 
                 GoogleCredential cred = new GoogleCredential().setAccessToken(token);
                 PlusDomains plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), cred).build();
-                Person mePerson = plusDomains.people().get("me").execute();
-
-                if (mePerson != null) {
-                    System.out.println(mePerson);
-                }
-//                PlusDomains plusDomains = new PlusDomains.Builder(new NetHttpTransport, new JacksonFactory, credential​).build();
-//                //Example of retrieving profile
-//                Person mePerson = plusDomains.people().get("me").execute();
                 //Retrieve circles, people
+                me = plusDomains.people().get("me").execute();
+                if (me != null) {
+                    System.out.println(me);
+                }
+                if(me.getDisplayName() != null) {
+                    System.out.println("display name: " + me.getDisplayName());
+                }
+                if(me.getOccupation() != null) {
+                    System.out.println("occupation: " + me.getOccupation());
+                }
+                if(me.getAboutMe() != null) {
+                    System.out.println("about me: " + me.getAboutMe());
+                }
+                if(me.getImage() != null){
+                    System.out.println("image url: " + me.getImage());
+                }
 
+                listCircles = plusDomains.circles().list("me");
+                if(listCircles != null) {
+                    circleFeed = listCircles.execute();
+                    circles = circleFeed.getItems();
+                    circle_list = new String[circles.size()];
+
+                    while (circles != null) {
+                        int i = 0;
+                        for (Circle circle : circles) {
+                            String name = circle.getDisplayName();
+                            circle_list[i] = name;
+
+//                            listPeople = plusDomains.people().listByCircle(name);
+//                            PeopleFeed peopleFeed = listPeople.execute();
+//                            circle_children = new String[circles.size()][peopleFeed.size()];
+//
+//                            if(peopleFeed.getItems() != null && peopleFeed.getItems().size() > 0 ) {
+//                                int j = 0;
+//                                for(Person person : peopleFeed.getItems()) {
+//                                    System.out.println("\t" + person.getDisplayName());
+//                                    circle_children[i][j] = person.getDisplayName();
+//                                    j++;
+//                                }
+//                            }
+////                            System.out.println(circle.getDisplayName());
+////                            System.out.println(circle_list[i]);
+//                            i++;
+                        }
+
+                        // When the next page token is null, there are no additional pages of
+                        // results. If this is the case, break.
+                        if (circleFeed.getNextPageToken() != null) {
+                            // Prepare the next page of results
+                            listCircles.setPageToken(circleFeed.getNextPageToken());
+
+                            // Execute and process the next page request
+                            circleFeed = listCircles.execute();
+                            circles = circleFeed.getItems();
+                        } else {
+                            circles = null;
+                        }
+                    }
+                }
 
             }
         } catch (IOException e) {
@@ -84,6 +144,27 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
 
         }
         return true;
+    }
+
+    @Override
+    protected void onPostExecute(final Boolean success) {
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
+
+        Intent activity = new Intent(context, PlusActivity.class);
+        activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activity.putExtra("accessToken", token);
+        if(circle_list.length > 0) {
+            activity.putExtra("circle_list", circle_list);
+        }
+//        if (circle_list.length > 0) {
+//            Bundle b = new Bundle();
+//            b.putSerializable("circle_children", circle_children);
+//            activity.putExtras(b);
+//        }
+//        activity.putExtra("displayName", me.getDisplayName());
+        context.startActivity(activity);
     }
 
     /**
