@@ -27,6 +27,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 //import com.google.android.gms.plus.model.people.Person;
@@ -58,10 +59,10 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     private static String accessToken;
 
     private static String displayName;
-    private static String occupation;
-    private static String organization;
-    private static String about;
-    private Person me = null;
+    private static String organizations;
+    private static String aboutMe;
+    private static String image_url;
+
     private static String[] circle_list;
     private static String[][] circle_children_list;
 
@@ -73,11 +74,24 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         Intent activity = getIntent();
         Bundle b = activity.getExtras();
         accessToken = activity.getExtras().getString("accessToken");
-//        accountName = activity.getExtras().getString("accountName");
-        about = activity.getExtras().getString("about");
+
+        aboutMe = activity.getExtras().getString("aboutMe");
+        organizations = activity.getExtras().getString("organizations");
         displayName = activity.getExtras().getString("displayName");
+        image_url = activity.getExtras().getString("image_url");
+
         circle_list = activity.getStringArrayExtra("circle_list");
-        circle_children_list = (String[][]) b.getSerializable("circle_children");
+//        circle_children_list = (String[][]) b.getSerializable("circle_children");
+
+        circle_children_list = GetUsernameTask.getArray();
+
+        //test
+//        for (int a = 0; a < circle_children_list.length; a++){
+//            for(int c = 0; c < circle_children_list[a].length; c++){
+//                System.out.print(a+ ":"+ c + " " + circle_children_list[a][c]);
+//            }
+//            System.out.println("\n" +circle_children_list[a].length);
+//        }
 
 //        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
 //        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
@@ -316,36 +330,41 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.profile_fragment, container, false);
 
-            TextView tvLabel = (TextView) rootView.findViewById(R.id.profile_info);
-            tvLabel.setText("Person's profile information\n");
+            TextView profile_name = (TextView) rootView.findViewById(R.id.profile_name);
+            if (displayName != null) {
+                profile_name.setText(displayName);
+            }
+            else{
+                displayName = "User";
+                profile_name.setText("User does not have a displayName");
+            }
+
+            TextView profile_info = (TextView) rootView.findViewById(R.id.profile_info);
+//            profile_info.setText("Person's profile information\n");
 
 //            if(me != null) {
-//                tvLabel.append(me.getDisplayName());
-//                tvLabel.append(me.getAboutMe());
+//                profile_info.append(me.getDisplayName());
+//                profile_info.append(me.getAboutMe());
 //            }
 //            else {
-//                tvLabel.append("me is null");
+//                profile_info.append("me is null");
 //            }
 
-//            if (accessToken != null) {
-//                tvLabel.append("accessToken" + accessToken);
-//            }
-//            else{
-//                tvLabel.append("token is null");
-//            }
-//
-            if (about != null) {
-                tvLabel.append("about" + about);
+            ImageView iv = (ImageView) rootView.findViewById(R.id.icon);
+            new LoadImage(image_url, iv);
+
+            if (organizations != null) {
+                profile_info.setText("Organizations: " + organizations + "\n");
             }
             else{
-                tvLabel.append("User does not have an About Me description");
+                profile_info.setText(displayName + " is not part of an organizations" + "\n");
             }
 
-            if (displayName != null) {
-                tvLabel.append("accountName" + displayName);
+            if (aboutMe != null) {
+                profile_info.append("About " + displayName + ": " + aboutMe + "\n");
             }
             else{
-                tvLabel.append("User does not have a displayName");
+                profile_info.append(displayName + " does not have an About Me description" + "\n");
             }
 
             Button email = (Button) rootView.findViewById(R.id.button_email);
@@ -407,12 +426,12 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             public Activity activity;
 //            private String[] circles = {"Friends", "Family", "Acquaintances", "Following"};
             private String[] circles = circle_list;
-            private String[][] circle_children = circle_children_list;
+            private String[][] circle_children = (String[][])circle_children_list;
 //            private String[][] circle_children = {
 //                    {"Friend1", "Friend2", "Friend3"},
 //                    {"Family1", "Family2", "Family3", "Family4"},
 //                    {"Acquaintance1", "Acquaintance2", "Acquaintance3"} ,
-//                    {"Following 1"}
+//                    {}
 //            };
 
             public FriendListAdapter (Activity activity) {
@@ -427,6 +446,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
             @Override
             public int getChildrenCount(int groupPosition) {
+                System.out.println("getChildrenCount: " + groupPosition);
                 return circle_children[groupPosition].length;
             }
 
