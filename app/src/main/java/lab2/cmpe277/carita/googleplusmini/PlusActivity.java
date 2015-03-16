@@ -50,10 +50,10 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //     */
     ViewPager mViewPager;
     private static PlusDomains plusDomains;
-    private static String accountName;
+//    private static String accountName;
     private static String accessToken;
-    private static String about;
-    private Person me;
+//    private static String about;
+    private Person me = null;
 
 //    private static ListView_Adapter listViewAdapter;
 //    private ListView listView;
@@ -64,9 +64,9 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         setContentView(R.layout.activity_main);
 
         Intent activity = getIntent();
-        accessToken = activity.getExtras().getString("accessToken");
+//        accessToken = activity.getExtras().getString("accessToken");
 //        accountName = activity.getExtras().getString("accountName");
-        about = activity.getExtras().getString("about");
+//        about = activity.getExtras().getString("about");
 
 //        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
 //        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
@@ -215,17 +215,17 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
 
-//    AsyncTask<Void, Void, String> getMe = new AsyncTask<Void, Void, String>() {
-//        @Override
-//        protected String doInBackground(Void... params) {
-//            try {
-//                me = plusDomains.people().get("me").execute();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            return null;
-//        }
-//    };
+    AsyncTask<Void, Void, String> getMe = new AsyncTask<Void, Void, String>() {
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                me = plusDomains.people().get("me").execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    };
 
     /**
      * A placeholder fragment containing a simple view.
@@ -274,20 +274,20 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             else{
                 tvLabel.append("token is null");
             }
-
-            if (about != null) {
-                tvLabel.append("about" + about);
-            }
-            else{
-                tvLabel.append("about is null");
-            }
-
-            if (accountName != null) {
-                tvLabel.append("accountName" + accountName);
-            }
-            else{
-                tvLabel.append("accountName is null");
-            }
+//
+//            if (about != null) {
+//                tvLabel.append("about" + about);
+//            }
+//            else{
+//                tvLabel.append("about is null");
+//            }
+//
+//            if (accountName != null) {
+//                tvLabel.append("accountName" + accountName);
+//            }
+//            else{
+//                tvLabel.append("accountName is null");
+//            }
 
             Button email = (Button) rootView.findViewById(R.id.button_email);
             email.setVisibility(View.INVISIBLE);    //Hide button on user's own profile

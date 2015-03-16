@@ -10,59 +10,60 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
         android:text="@string/app_name"
+        android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/login_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/title"
-        android:layout_marginTop="80dp"
-        android:layout_marginLeft="10dp"
-        android:text="@string/login_name"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <EditText
-        android:id="@+id/login_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/login_text"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_toRightOf="@+id/login_text"
-        android:ems="10" >
+    <!--<TextView-->
+        <!--android:id="@+id/login_text"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_below="@+id/title"-->
+        <!--android:layout_marginTop="80dp"-->
+        <!--android:layout_marginLeft="10dp"-->
+        <!--android:text="@string/login_name"-->
+        <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
 
-        <requestFocus />
-    </EditText>
+    <!--<EditText-->
+        <!--android:id="@+id/login_password"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignBottom="@+id/login_text"-->
+        <!--android:layout_marginLeft="10dp"-->
+        <!--android:layout_marginRight="10dp"-->
+        <!--android:layout_toRightOf="@+id/login_text"-->
+        <!--android:ems="10" >-->
 
-    <TextView
-        android:id="@+id/password_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/login_text"
-        android:layout_below="@+id/login_text"
-        android:layout_marginTop="38dp"
-        android:layout_marginLeft="10dp"
-        android:text="@string/login_password"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <!--<requestFocus />-->
+    <!--</EditText>-->
 
-    <EditText
-        android:id="@+id/editText2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/password_text"
-        android:layout_alignLeft="@+id/login_password"
-        android:layout_marginRight="10dp"
-        android:ems="10"
-        android:inputType="textPassword" />
+    <!--<TextView-->
+        <!--android:id="@+id/password_text"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignLeft="@+id/login_text"-->
+        <!--android:layout_below="@+id/login_text"-->
+        <!--android:layout_marginTop="38dp"-->
+        <!--android:layout_marginLeft="10dp"-->
+        <!--android:text="@string/login_password"-->
+        <!--android:textAppearance="?android:attr/textAppearanceMedium" />-->
+
+    <!--<EditText-->
+        <!--android:id="@+id/editText2"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignBottom="@+id/password_text"-->
+        <!--android:layout_alignLeft="@+id/login_password"-->
+        <!--android:layout_marginRight="10dp"-->
+        <!--android:ems="10"-->
+        <!--android:inputType="textPassword" />-->
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText2"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="94dp"/>
-
+    <!--android:layout_below="@+id/editText2"-->
 </RelativeLayout>
