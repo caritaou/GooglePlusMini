@@ -38,6 +38,12 @@ import com.google.api.services.plusDomains.PlusDomains;
 import com.google.api.services.plusDomains.model.Circle;
 import com.google.api.services.plusDomains.model.CircleFeed;
 import com.google.api.services.plusDomains.model.Person;
+import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
 
 public class PlusActivity extends ActionBarActivity implements ActionBar.TabListener  {
@@ -67,10 +73,33 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
     private static String[][] circle_children_list;
     private static Person[][] circle_children_people;
 
+    private static ImageLoader imageLoader;
+    private static DisplayImageOptions options;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        // UNIVERSAL IMAGE LOADER SETUP
+        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+//                .cacheOnDisc(true).cacheInMemory(true)
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .displayer(new FadeInBitmapDisplayer(300)).build();
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+                getApplicationContext())
+                .defaultDisplayImageOptions(defaultOptions)
+//                .memoryCache(new WeakMemoryCache())
+                .discCacheSize(100 * 1024 * 1024).build();
+        ImageLoader.getInstance().init(config);
+
+        imageLoader = ImageLoader.getInstance();
+        options = new DisplayImageOptions.Builder().cacheInMemory(true)
+                .cacheOnDisc(true).resetViewBeforeLoading(true)
+                .showImageForEmptyUri(getResources().getDrawable(R.drawable.ic_launcher))
+                .showImageOnFail(getResources().getDrawable(R.drawable.ic_launcher))
+                .showImageOnLoading(getResources().getDrawable(R.drawable.ic_launcher)).build();
 
         Intent activity = getIntent();
 //        Bundle b = activity.getExtras();
@@ -331,6 +360,10 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.profile_fragment, container, false);
+            ImageView imageView = (ImageView) rootView.findViewById(R.id.icon);
+
+            //download and display image from url
+            imageLoader.displayImage(image_url, imageView, options);
 
             TextView profile_name = (TextView) rootView.findViewById(R.id.profile_name);
             if (displayName != null) {
@@ -515,16 +548,17 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
             @Override
             public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-//                TextView textView = new TextView(MyCircles.this.getActivity());
-                TextView textView = null;
-
                 if (convertView == null) {
                     convertView = inflater.inflate(R.layout.entry, null);
                 }
 
                 convertView.setClickable(false);
-                textView = (TextView) convertView.findViewById(R.id.entry);
+                TextView textView = (TextView) convertView.findViewById(R.id.entry);
                 textView.setText(getChild(groupPosition, childPosition).toString());
+
+                Person friend = circle_children_people[groupPosition][childPosition];
+                ImageView icon = (ImageView) convertView.findViewById(R.id.mini_icon);
+                imageLoader.displayImage(friend.getImage().getUrl(), icon, options);
                 return convertView;
             }
 

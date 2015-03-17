@@ -13,6 +13,7 @@
         android:layout_alignParentTop="true"
         android:layout_weight="0.5"
         android:contentDescription="Profile Picture"
+        android:background="@color/dark_gray"
         android:src="@drawable/ic_launcher" />  <!-- set the profile picture -->
 
     <TextView android:id="@+id/profile_name"
@@ -34,8 +35,13 @@
 
     <Button
         android:id="@+id/button_email"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Email" />
+        android:layout_marginBottom="5dp"
+        android:text="Email"
+        android:layout_gravity="center_horizontal"/>
+        <!--android:background="@color/medium_gray"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--style="@style/Base.ThemeOverlay.AppCompat.Dark" -->
 
 </LinearLayout>

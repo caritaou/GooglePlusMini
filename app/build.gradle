@@ -26,4 +26,5 @@ dependencies {
     compile 'com.google.api-client:google-api-client:1.18.0-rc'
     compile 'com.google.http-client:google-http-client-jackson2:1.18.0-rc'
     compile 'com.google.apis:google-api-services-plusDomains:v1-rev117-1.19.1'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.3'
 }

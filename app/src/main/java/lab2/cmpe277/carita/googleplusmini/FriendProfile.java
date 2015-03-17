@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.api.services.plusDomains.model.Person;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 
 public class FriendProfile extends ActionBarActivity {
@@ -29,6 +31,20 @@ public class FriendProfile extends ActionBarActivity {
         friendOrganizations = activity.getExtras().getString("friendOrganizations");
         friendDisplayName = activity.getExtras().getString("friendDisplayName");
         friendImage_url = activity.getExtras().getString("friendImage_url");
+
+        ImageLoader imageLoader = ImageLoader.getInstance();
+        DisplayImageOptions options = new DisplayImageOptions.Builder().cacheInMemory(true)
+//                .cacheOnDisc(true).resetViewBeforeLoading(true)
+                .showImageForEmptyUri(getResources().getDrawable(R.drawable.ic_launcher))
+                .showImageOnFail(getResources().getDrawable(R.drawable.ic_launcher))
+                .showImageOnLoading(getResources().getDrawable(R.drawable.ic_launcher)).build();
+
+        //initialize image view
+        ImageView imageView = (ImageView) findViewById(R.id.icon);
+
+        //download and display image from url
+        imageLoader.displayImage(friendImage_url, imageView, options);
+
 
         TextView profile_name = (TextView) findViewById(R.id.profile_name);
         if (friendDisplayName != null) {

@@ -7,11 +7,10 @@
     <!-- <string name="title_section3">Friends</string> -->
     <string name="action_settings">Settings</string>
     <string name="action_sign_out">Sign Out</string>
-    <string name="login_name">Google+ login:</string>
-    <string name="login_password">Password:</string>
-    <string name="login_button">Login Google+</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_friend_profile">FriendProfile</string>
+    <string name="title_activity_friend_profile">GooglePlusMini - Friend</string>
     <string name="hello_world">Hello world!</string>
 
+    <color name ="medium_gray">#ffb1b1b1</color>
+    <color name ="light_gray">#E6E6E6</color>
+    <color name ="dark_gray">#2E2E2E</color>
 </resources>
