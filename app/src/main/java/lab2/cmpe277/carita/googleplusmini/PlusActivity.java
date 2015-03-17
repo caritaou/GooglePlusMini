@@ -1,15 +1,11 @@
 package lab2.cmpe277.carita.googleplusmini;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -30,15 +26,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-//import com.google.android.gms.plus.model.people.Person;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.plusDomains.PlusDomains;
-import com.google.api.services.plusDomains.model.Circle;
-import com.google.api.services.plusDomains.model.CircleFeed;
 import com.google.api.services.plusDomains.model.Person;
-import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -60,14 +48,13 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 //     * The {@link ViewPager} that will host the section contents.
 //     */
     ViewPager mViewPager;
-//    private static PlusDomains plusDomains;
-//    private static String accountName;
     private static String accessToken;
 
     private static String displayName;
     private static String organizations;
     private static String aboutMe;
     private static String image_url;
+    private static String occupation;
 
     private static String[] circle_list;
     private static String[][] circle_children_list;
@@ -84,13 +71,11 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
         // UNIVERSAL IMAGE LOADER SETUP
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
-//                .cacheOnDisc(true).cacheInMemory(true)
                 .imageScaleType(ImageScaleType.EXACTLY)
                 .displayer(new FadeInBitmapDisplayer(300)).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
                 getApplicationContext())
                 .defaultDisplayImageOptions(defaultOptions)
-//                .memoryCache(new WeakMemoryCache())
                 .discCacheSize(100 * 1024 * 1024).build();
         ImageLoader.getInstance().init(config);
 
@@ -102,32 +87,18 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                 .showImageOnLoading(getResources().getDrawable(R.drawable.ic_launcher)).build();
 
         Intent activity = getIntent();
-//        Bundle b = activity.getExtras();
         accessToken = activity.getExtras().getString("accessToken");
 
         aboutMe = activity.getExtras().getString("aboutMe");
+        occupation = activity.getExtras().getString("occupation");
         organizations = activity.getExtras().getString("organizations");
         displayName = activity.getExtras().getString("displayName");
         image_url = activity.getExtras().getString("image_url");
+        image_url = image_url.substring(0,image_url.indexOf("?")) + "?sz=300";
 
         circle_list = activity.getStringArrayExtra("circle_list");
-//        circle_children_list = (String[][]) b.getSerializable("circle_children");
-
         circle_children_list = GetUsernameTask.getArray();
         circle_children_people = GetUsernameTask.getCircle_children_people();
-
-        //test
-//        for (int a = 0; a < circle_children_list.length; a++){
-//            for(int c = 0; c < circle_children_list[a].length; c++){
-//                System.out.print(a+ ":"+ c + " " + circle_children_list[a][c]);
-//            }
-//            System.out.println("\n" +circle_children_list[a].length);
-//        }
-
-//        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-//        plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
-
-//        getMe.execute();
 
         //Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -199,13 +170,6 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         return super.onOptionsItemSelected(item);
     }
 
-//    @Override
-//    public boolean onPrepareOptionsMenu (Menu menu) {
-//        if (!loggedIn)
-//            menu.getItem(1).setEnabled(false);
-//        return true;
-//    }
-
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
         // When the given tab is selected, switch to the corresponding page in
@@ -240,8 +204,6 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                     return MyProfile.newInstance(0, "Profile");
                 case 1:
                     return MyCircles.newInstance(1, "Circles");
-//                case 2:
-//                    return Friends.newInstance(2, "Friends");
                 default:
                     return null;
             }
@@ -262,77 +224,13 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                     return getString(R.string.title_section1).toUpperCase(l);
                 case 1:
                     return getString(R.string.title_section2).toUpperCase(l);
-//                case 2:
-//                    return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
         }
     }
 
-
-//    AsyncTask<Void, Void, String> getMe = new AsyncTask<Void, Void, String>() {
-//        private ProgressDialog dialog;
-//        @Override
-//        protected void onPreExecute() {
-//            dialog = new ProgressDialog();
-//            dialog.setMessage("Logging In...");
-//            dialog.show();
-//        }
-//
-//        @Override
-//        protected String doInBackground(Void... params) {
-//            try {
-//                me = plusDomains.people().get("me").execute();
-//                myCircles = plusDomains.circles().list("me");
-//                circleFeed = myCircles.execute();
-//                circle_list = circleFeed.getItems();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String result) {
-//            //Set up the action bar.
-//            final ActionBar actionBar = getSupportActionBar();
-//            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-//            actionBar.setHomeButtonEnabled(true);
-//
-//            // Create the adapter that will return a fragment for each of the three
-//            // primary sections of the activity.
-//            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-//
-//            // Set up the ViewPager with the sections adapter.
-//            mViewPager = (ViewPager) findViewById(R.id.pager);
-//            mViewPager.setAdapter(mSectionsPagerAdapter);
-//
-//            // When swiping between different sections, select the corresponding
-//            // tab. We can also use ActionBar.Tab#select() to do this if we have
-//            // a reference to the Tab.
-//            mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-//                @Override
-//                public void onPageSelected(int position) {
-//                    actionBar.setSelectedNavigationItem(position);
-//                }
-//            });
-//
-//            // For each of the sections in the app, add a tab to the action bar.
-//            for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-//                // Create a tab with text corresponding to the page title defined by
-//                // the adapter. Also specify this Activity object, which implements
-//                // the TabListener interface, as the callback (listener) for when
-//                // this tab is selected.
-//                actionBar.addTab(
-//                        actionBar.newTab()
-//                                .setText(mSectionsPagerAdapter.getPageTitle(i))
-//                                .setTabListener(PlusActivity.this));
-//            }
-//        }
-//    };
-
     /**
-     * A placeholder fragment containing a simple view.
+     * Fragment containing the user's profile
      */
     public static class MyProfile extends Fragment {
         /**
@@ -341,7 +239,6 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String TITLE = "Profile";
-//        private Person me;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -375,14 +272,18 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             }
 
             TextView profile_info = (TextView) rootView.findViewById(R.id.profile_info);
-            ImageView iv = (ImageView) rootView.findViewById(R.id.icon);
-            new LoadImage(image_url, iv);
-
-            if (organizations != null) {
-                profile_info.setText("Organizations: " + organizations + "\n");
+            if (occupation != null) {
+                profile_info.setText("Occupation: " + occupation + "\n");
             }
             else{
-                profile_info.setText(displayName + " is not part of an organizations" + "\n");
+                profile_info.setText("No occupation set" + "\n");
+            }
+
+            if (organizations != null) {
+                profile_info.append("Organizations: " + organizations + "\n");
+            }
+            else{
+                profile_info.append("Not in any organizations" + "\n");
             }
 
             if (aboutMe != null) {
@@ -394,19 +295,13 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
             Button email = (Button) rootView.findViewById(R.id.button_email);
             email.setVisibility(View.INVISIBLE);    //Hide button on user's own profile
-            email.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                    emailIntent.setType("message/rfc822");
-                    startActivity(Intent.createChooser(emailIntent, "Choose an Email Client:"));
-                }
-            });
-
             return rootView;
         }
     }
 
+    /**
+     * Fragment containing the user's circles of friends
+     */
     public static class MyCircles extends Fragment {
         /**
          * The fragment argument representing the section number for this
@@ -435,25 +330,28 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
             ExpandableListView list = (ExpandableListView) rootView.findViewById(R.id.listView);
             list.setAdapter(new FriendListAdapter(this.getActivity()));
             list.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                //Set child listener. clicking on friend under a circle will open the friend's profile
                 @Override
                 public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                     String friendDisplayName;
                     String friendOrganizations = "";
                     String friendAboutMe;
                     String friendImage_url;
+                    String friendOccupation;
 
                     Intent activity = new Intent(parent.getContext(), FriendProfile.class);
                     activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                     Person friend = circle_children_people[groupPosition][childPosition];
-                    if (friend != null) {
-                        System.out.println(friend);
-                    }
-                    if(friend.getDisplayName() != null) {
-                        friendDisplayName = friend.getDisplayName();
-                        activity.putExtra("friendDisplayName", friendDisplayName);
-                        System.out.println("friendDisplayName " + friendDisplayName);
-                    }
+                    friendDisplayName = friend.getDisplayName();
+                    activity.putExtra("friendDisplayName", friendDisplayName);
+                    friendAboutMe = friend.getAboutMe();
+                    activity.putExtra("friendAboutMe", friendAboutMe);
+                    friendImage_url = friend.getImage().getUrl();
+                    activity.putExtra("friendImage_url", friendImage_url);
+                    friendOccupation = friend.getOccupation();
+                    activity.putExtra("friendOccupation", friendOccupation);
+
                     if(friend.getOrganizations() != null) {
                         List<Person.Organizations> tmp = friend.getOrganizations();
                         for (Person.Organizations o: tmp){
@@ -461,17 +359,6 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
                         }
                         friendOrganizations = friendOrganizations.substring(0, friendOrganizations.length()-1); //remove the last comma
                         activity.putExtra("friendOrganizations", friendOrganizations);
-                        System.out.println("friendOrganizations " + friendOrganizations);
-                    }
-                    if(friend.getTagline() != null) {
-                        friendAboutMe = friend.getTagline();
-                        activity.putExtra("friendAboutMe", friendAboutMe);
-                        System.out.println("friendAboutMe " + friendAboutMe);
-                    }
-                    if(friend.getImage() != null){
-                        friendImage_url = friend.getImage().getUrl();
-                        activity.putExtra("friendImage_url", friendImage_url);
-                        System.out.println("friendImage_url " + friendImage_url);
                     }
 
                     startActivity(activity);
@@ -484,15 +371,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         public class FriendListAdapter extends BaseExpandableListAdapter {
             public LayoutInflater inflater;
             public Activity activity;
-//            private String[] circles = {"Friends", "Family", "Acquaintances", "Following"};
             private String[] circles = circle_list;
             private String[][] circle_children = (String[][])circle_children_list;
-//            private String[][] circle_children = {
-//                    {"Friend1", "Friend2", "Friend3"},
-//                    {"Family1", "Family2", "Family3", "Family4"},
-//                    {"Acquaintance1", "Acquaintance2", "Acquaintance3"} ,
-//                    {}
-//            };
 
             public FriendListAdapter (Activity activity) {
                 this.activity = activity;

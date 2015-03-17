@@ -37,9 +37,6 @@
             android:label="@string/title_activity_friend_profile">
         </activity>
 
-        <!-- <meta-data -->
-        <!-- android:name="com.google.android." -->
-        <!-- android:value="AIzaSyA0-gcjGOCvtR3bR2XmhuPqOG4A5QS9TUo" /> -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

@@ -2,15 +2,19 @@
 <resources>
 
     <string name="app_name">GooglePlusMini</string>
+    <string name="colored_app_name"><font color="blue">G</font><font color="red">o</font><font color="yellow">o</font><font color="blue">g</font><font color="green">l</font><font color="red">e</font>PlusMini</string>
     <string name="title_section1">Profile</string>
     <string name="title_section2">Circles</string>
-    <!-- <string name="title_section3">Friends</string> -->
     <string name="action_settings">Settings</string>
     <string name="action_sign_out">Sign Out</string>
     <string name="title_activity_friend_profile">GooglePlusMini - Friend</string>
-    <string name="hello_world">Hello world!</string>
 
-    <color name ="medium_gray">#ffb1b1b1</color>
-    <color name ="light_gray">#E6E6E6</color>
-    <color name ="dark_gray">#2E2E2E</color>
+    <color name="blue">#3369E8</color>
+    <color name="red">#D50F25</color>
+    <color name="yellow">#EEB211</color>
+    <color name="green">#009925</color>
+
+    <color name="medium_gray">#ffb1b1b1</color>
+    <color name="light_gray">#E6E6E6</color>
+    <color name="dark_gray">#2E2E2E</color>
 </resources>

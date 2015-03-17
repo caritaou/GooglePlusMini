@@ -4,9 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -19,10 +17,6 @@ import com.google.api.services.plusDomains.model.Circle;
 import com.google.api.services.plusDomains.model.CircleFeed;
 import com.google.api.services.plusDomains.model.PeopleFeed;
 import com.google.api.services.plusDomains.model.Person;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,16 +33,16 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
 
     //Person
     Person me;
-    private static String ME_JSON;
-    private String displayName;
-    private static String organizations = "";
+    private static String displayName;
+    private static String occupation;
+    private static String organizations;
     private static String aboutMe;
     private static String image_url;
 
     //MyCircles
-    String[] circle_list;
-    static String[][] circle_children;
-    static Person[][] circle_children_people;
+    String[] circle_list;                       //the list of circles the user has
+    static String[][] circle_children;          //the list of names in each circle
+    static Person[][] circle_children_people;   //the list of friends (Person) in each circle
     PlusDomains.Circles.List listCircles;
     CircleFeed circleFeed;
     List<Circle> circles;
@@ -61,6 +55,9 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
         this.mEmail = name;
     }
 
+    /**
+     * Sets an in progress dialog while user sign's in to prevent an unpopulated profile
+     */
     protected void onPreExecute() {
         dialog = new ProgressDialog(context);
         dialog.setMessage("Logging In...");
@@ -83,33 +80,18 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
                 //Retrieve circles, people
                 me = plusDomains.people().get("me").execute();
 
-                if (me != null) {
-//                    try {
-//                        ME_JSON = new JSONObject(me);
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-                    System.out.println(me);
-                }
-                if(me.getDisplayName() != null) {
-                    displayName = me.getDisplayName();
-                    System.out.println("display name: " + displayName);
-                }
+                displayName = me.getDisplayName();
+                aboutMe = me.getAboutMe();
+                image_url = me.getImage().getUrl();
+                occupation = me.getOccupation();
+
+                organizations = "";
                 if(me.getOrganizations() != null) {
                     List<Person.Organizations> tmp = me.getOrganizations();
                     for (Person.Organizations o: tmp){
                         organizations = organizations + " " + o.getName() + ",";
                     }
                     organizations = organizations.substring(0, organizations.length()-1); //remove the last comma
-                    System.out.println("Organizations: " + organizations);
-                }
-                if(me.getTagline() != null) {
-                    aboutMe = me.getTagline();
-                    System.out.println("about me: " + aboutMe);
-                }
-                if(me.getImage() != null){
-                    image_url = me.getImage().getUrl();
-                    System.out.println("image url: " + image_url);
                 }
 
                 listCircles = plusDomains.circles().list("me");
@@ -129,7 +111,6 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
                             String id = circle.getId();
                             listPeople = plusDomains.people().listByCircle(id);
                             PeopleFeed peopleFeed = listPeople.execute();
-//                            circle_children = new String[circles.size()][peopleFeed.size()];
 
                             if(peopleFeed.getItems() != null && peopleFeed.getItems().size() > 0 ) {
                                 circle_children[i] = new String[peopleFeed.getItems().size()];
@@ -141,26 +122,13 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
                                     circle_children_people[i][j] = person;
                                     j++;
                                 }
-//                                circle_children[i] = tmp;
                             }
                             else {
                                 circle_children[i] = new String[0];
                                 circle_children_people[i] = new Person[0];
                             }
-//                            System.out.println(circle.getDisplayName());
-//                            System.out.println(circle_list[i]);
                             i++;
                         }
-
-
-                        //test
-                        for (int a = 0; a < circle_children_people.length; a++){
-                            for(int b = 0; b < circle_children_people[a].length; b++){
-                                System.out.print(a+ ":"+ b + " " + circle_children_people[a][b]);
-                            }
-                            System.out.println("\n" +circle_children_people[a].length);
-                        }
-
 
                         // When the next page token is null, there are no additional pages of
                         // results. If this is the case, break.
@@ -179,11 +147,7 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
 
             }
         } catch (IOException e) {
-            // The fetchToken() method handles Google-specific exceptions,
-            // so this indicates something went wrong at a higher level.
-            // TIP: Check for network connectivity before starting the AsyncTask.
             Log.d("", "exception", e);
-
         }
         return true;
     }
@@ -203,17 +167,12 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
         activity.putExtra("organizations", organizations);
         activity.putExtra("aboutMe", aboutMe);
         activity.putExtra("image_url", image_url);
+        activity.putExtra("occupation", occupation);
 
         //Pass the list of circles to intent
         if(circle_list.length > 0) {
             activity.putExtra("circle_list", circle_list);
         }
-        if (circle_children.length > 0) {
-            Bundle b = new Bundle();
-            b.putSerializable("circle_children", circle_children);
-            activity.putExtras(b);
-        }
-//        activity.putExtra("displayName", me.getDisplayName());
         context.startActivity(activity);
     }
 
