@@ -21,7 +21,7 @@ import com.google.api.services.plusDomains.model.Person;
 import java.io.IOException;
 import java.util.List;
 
-public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
+public class GetInfoTask extends AsyncTask<String, Void, Boolean> {
     /** progress dialog to show user that the backup is processing. */
     private ProgressDialog dialog;
 
@@ -48,7 +48,7 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
     List<Circle> circles;
     PlusDomains.People.ListByCircle listPeople;
 
-    GetUsernameTask(LoginActivity activity, String name, String scope) {
+    GetInfoTask(LoginActivity activity, String name, String scope) {
         this.mActivity = activity;
         context = activity;
         this.mScope = scope;
@@ -73,11 +73,9 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
         try {
             token = fetchToken();
             if (token != null) {
-                System.out.println(token);
-
                 GoogleCredential cred = new GoogleCredential().setAccessToken(token);
                 PlusDomains plusDomains = new PlusDomains.Builder(new NetHttpTransport(), new JacksonFactory(), cred).build();
-                //Retrieve circles, people
+                //get myself
                 me = plusDomains.people().get("me").execute();
 
                 displayName = me.getDisplayName();
@@ -94,6 +92,7 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
                     organizations = organizations.substring(0, organizations.length()-1); //remove the last comma
                 }
 
+                //get my circles
                 listCircles = plusDomains.circles().list("me");
                 if(listCircles != null) {
                     circleFeed = listCircles.execute();
@@ -117,21 +116,25 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
                                 circle_children_people[i] = new Person[peopleFeed.getItems().size()];
                                 int j = 0;
                                 for(Person person : peopleFeed.getItems()) {
-                                    System.out.println("\t" + person.getDisplayName());
                                     circle_children[i][j] = person.getDisplayName();
                                     circle_children_people[i][j] = person;
+                                    //Cannot get user information of people who are not in my domain
+                                    //https://developers.google.com/+/domains/authentication/delegation
+                                    //based on above link, I do not have admin access to configure this
+                                    //Also am not publishing this app to Google Apps Marketplace
+//                                    Person friend = plusDomains.people().get(person.getId()).execute();
+//                                    circle_children_people[i][j] = friend;
                                     j++;
                                 }
                             }
-                            else {
+                            else { //add empty array into the children
                                 circle_children[i] = new String[0];
                                 circle_children_people[i] = new Person[0];
                             }
                             i++;
                         }
 
-                        // When the next page token is null, there are no additional pages of
-                        // results. If this is the case, break.
+                        // When the next page token is null, there are no additional pages of results
                         if (circleFeed.getNextPageToken() != null) {
                             // Prepare the next page of results
                             listCircles.setPageToken(circleFeed.getNextPageToken());
@@ -152,6 +155,10 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
         return true;
     }
 
+    /**
+     * After obtaining information about "myself" and friends, start the main activity: PlusActivity
+     * @param success
+     */
     @Override
     protected void onPostExecute(final Boolean success) {
         if (dialog.isShowing()) {
@@ -176,10 +183,12 @@ public class GetUsernameTask extends AsyncTask<String, Void, Boolean> {
         context.startActivity(activity);
     }
 
+    //list of names of friends in each circle
     public static String[][] getArray() {
         return circle_children;
     }
 
+    //list of friends in each circle
     public static Person[][] getCircle_children_people(){
         return circle_children_people;
     }

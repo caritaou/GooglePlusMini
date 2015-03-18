@@ -97,8 +97,8 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
         image_url = image_url.substring(0,image_url.indexOf("?")) + "?sz=300";
 
         circle_list = activity.getStringArrayExtra("circle_list");
-        circle_children_list = GetUsernameTask.getArray();
-        circle_children_people = GetUsernameTask.getCircle_children_people();
+        circle_children_list = GetInfoTask.getArray();
+        circle_children_people = GetInfoTask.getCircle_children_people();
 
         //Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -212,7 +212,7 @@ public class PlusActivity extends ActionBarActivity implements ActionBar.TabList
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show 2 total pages.
             return 2;
         }
 
